@@ -1,4 +1,7 @@
 use anchor_lang::prelude::*;
+//import custom files
+mod state;
+
 
 declare_id!("3F2sJzYnEQUt7J3MERtFCHKrz1VDQoFTg1gmZFxk9c86");
 
