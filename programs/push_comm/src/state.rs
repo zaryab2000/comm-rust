@@ -4,6 +4,7 @@ declare_id!("3F2sJzYnEQUt7J3MERtFCHKrz1VDQoFTg1gmZFxk9c86");
 
 // Constant States
 pub const NAME: &str = "Push Comm V3";
+pub const CHAIN_NAME: &str = "Solana Mainnet"; 
 
 // States of PushComm Program
 #[account]
@@ -43,6 +44,5 @@ pub struct PushCommStorageV3 {
     pub user_count: u64,
     pub is_migration_complete: bool,
     pub push_core_address: Pubkey,
-    pub chain_name: String,
     pub push_token_ntt: Pubkey,
 }
