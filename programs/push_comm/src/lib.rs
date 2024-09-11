@@ -24,18 +24,6 @@ pub mod push_comm {
         Ok(())
     }
 
-    pub fn verify_channel_alias(ctx: Context<AliasVerification>,
-        channel_address: String
-    ) -> Result<()> {
-        let storage = &mut ctx.accounts.storage;
-        emit!(ChannelAlias {
-            chain_name: CHAIN_NAME.to_string(),
-            chain_id: storage.chain_id,
-            channel_address: channel_address,
-        });
-        Ok(())
-    }
-
 /**
  * ADMIN FUNCTIONS
  */
@@ -79,6 +67,31 @@ pub mod push_comm {
         storage.paused = false;
         Ok(())
     }
+
+    pub fn transfer_admin_ownership(ctx: Context<OwnershipTransfer>,
+        new_owner: Pubkey
+    ) -> Result<()>{
+        let storage = &mut ctx.accounts.storage;
+
+        storage.push_channel_admin = new_owner;
+        Ok(())
+    }
+
+
+/**
+ * PUBLIC FUNCTIONS
+ */
+    pub fn verify_channel_alias(ctx: Context<AliasVerification>,
+        channel_address: String
+    ) -> Result<()> {
+        let storage = &mut ctx.accounts.storage;
+        emit!(ChannelAlias {
+            chain_name: CHAIN_NAME.to_string(),
+            chain_id: storage.chain_id,
+            channel_address: channel_address,
+        });
+        Ok(())
+    }
     
 }
 
@@ -96,6 +109,7 @@ pub struct Initialize <'info>{
     pub system_program: Program<'info, System>,
 }
 
+// ADMIN-SPECIFIC-CONTEXTS
 #[derive(Accounts)]
 pub struct SetCoreAddress <'info> {
     #[account(mut, has_one = push_channel_admin @ PushCommError::Unauthorized)]
@@ -133,6 +147,16 @@ pub struct Pausability<'info > {
     pub push_channel_admin : Signer<'info>,
 }
 
+#[derive(Accounts)]
+pub struct OwnershipTransfer<'info> {
+    #[account(mut, has_one = push_channel_admin @ PushCommError::Unauthorized)]
+    pub storage: Account<'info, PushCommStorageV3>,
+
+    #[account(signer)]
+    pub push_channel_admin : Signer<'info>,
+}
+
+// PUBLIC-CONTEXTS
 #[derive(Accounts)]
 pub struct AliasVerification <'info > {
     #[account(mut)]
