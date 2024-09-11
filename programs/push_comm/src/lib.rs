@@ -62,6 +62,23 @@ pub mod push_comm {
         storage.push_token_ntt = token_address;
         Ok(())
     }
+
+    pub fn pause_contract(ctx: Context<Pausability>,
+    ) -> Result<()>{
+        let storage = &mut ctx.accounts.storage;
+        require!(storage.paused == false, PushCommError::AlreadyPaused);
+        storage.paused = true;
+        Ok(())
+    }
+
+    pub fn unpause_contract(ctx: Context<Pausability>,
+    ) -> Result<()>{
+        let storage = &mut ctx.accounts.storage;
+        require!(storage.paused == true, PushCommError::NotPaused);
+
+        storage.paused = false;
+        Ok(())
+    }
     
 }
 
@@ -108,6 +125,15 @@ pub struct SetPushTokenAddress <'info> {
 }
 
 #[derive(Accounts)]
+pub struct Pausability<'info > {
+    #[account(mut, has_one = push_channel_admin @ PushCommError::Unauthorized)]
+    pub storage: Account<'info, PushCommStorageV3>,
+
+    #[account(signer)]
+    pub push_channel_admin : Signer<'info>,
+}
+
+#[derive(Accounts)]
 pub struct AliasVerification <'info > {
     #[account(mut)]
     pub storage: Account<'info, PushCommStorageV3>
@@ -122,6 +148,10 @@ pub enum PushCommError {
     InvalidArgument,
     #[msg("Arithmetic operation failed")]
     ArithmeticError,
+    #[msg("Program is currently paused")]
+    AlreadyPaused,
+    #[msg("Program is not paused")]
+    NotPaused,
     // Add more errors as needed
 }
 
