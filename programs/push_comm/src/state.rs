@@ -14,7 +14,7 @@ pub struct UserStorage{
     pub user_start_block: u64,
     pub user_subscribe_count: u64,
 }
-
+// UserStorage-Specific Mappings
 #[account]
 pub struct IsSubscribed {
     pub user: Pubkey,    // User public key
@@ -34,6 +34,14 @@ pub struct MapAddressSubscribed {
     pub user: Pubkey,
     pub index: u64, // Index of the subscription
     pub channel: Pubkey, // Subscribed channel public key
+}
+// Additional Key-Value Maps
+
+#[account]
+pub struct DelegatedNotificationSenders{
+    pub channel: Pubkey,
+    pub delegate: Pubkey,
+    pub is_delegate: bool,
 }
 
 #[account]

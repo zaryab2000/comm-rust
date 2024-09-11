@@ -11,6 +11,8 @@ declare_id!("3F2sJzYnEQUt7J3MERtFCHKrz1VDQoFTg1gmZFxk9c86");
 
 #[program]
 pub mod push_comm {
+    use anchor_lang::accounts::account;
+
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>, 
@@ -92,6 +94,41 @@ pub mod push_comm {
         });
         Ok(())
     }
+
+    pub fn add_delegate(ctx: Context<DelegateNotifSenders>,
+        channel: Pubkey,
+        delegate: Pubkey
+    ) -> Result<()>{
+        // TO-DO :added _subscribe() function here
+        let storage = &mut ctx.accounts.storage;
+        
+        storage.channel = channel;
+        storage.delegate = delegate;
+        storage.is_delegate = true;
+        
+        emit!(AddDelegate {
+            channel: ctx.accounts.storage.channel,
+            delegate: ctx.accounts.storage.delegate,
+        });
+        Ok(())
+    }
+
+    pub fn remove_delegate(ctx: Context<DelegateNotifSenders>,
+        channel: Pubkey,
+        delegate: Pubkey
+    ) -> Result<()>{
+        let storage = &mut ctx.accounts.storage;
+
+        storage.channel = channel;
+        storage.delegate = delegate;
+        storage.is_delegate = false;
+
+        emit!(RemoveDelegate {
+            channel: ctx.accounts.storage.channel,
+            delegate: ctx.accounts.storage.delegate,
+        });
+        Ok(())
+    }
     
 }
 
@@ -163,6 +200,22 @@ pub struct AliasVerification <'info > {
     pub storage: Account<'info, PushCommStorageV3>
 }
 
+#[derive(Accounts)]
+#[instruction(channel: Pubkey, delegate: Pubkey)]
+pub struct DelegateNotifSenders <'info>{
+    #[account(
+        init,
+        payer = user,
+        space = 8 + 1, // discriminator + bool
+        seeds = [b"delegate", channel.key().as_ref(), delegate.key().as_ref()],
+        bump )]
+    pub storage: Account<'info, DelegatedNotificationSenders>,
+
+    #[account(mut)]
+    pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
 // Error Handling
 #[error_code]
 pub enum PushCommError {
@@ -186,4 +239,13 @@ pub struct ChannelAlias{
     pub chain_id: u64,
     pub channel_address: String,
 }
-
+#[event]
+pub struct AddDelegate{
+    pub channel: Pubkey,
+    pub delegate: Pubkey,
+}
+#[event]
+pub struct RemoveDelegate{
+    pub channel: Pubkey,
+    pub delegate: Pubkey,
+}
