@@ -5,8 +5,6 @@ use core::mem::size_of;
 mod state;
 use crate::state::*;
 
-
-
 declare_id!("3F2sJzYnEQUt7J3MERtFCHKrz1VDQoFTg1gmZFxk9c86");
 
 #[program]
