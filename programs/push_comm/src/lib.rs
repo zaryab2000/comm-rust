@@ -3,7 +3,7 @@ use core::mem::size_of;
 
 //import custom files
 mod state;
-use crate::state::PushCommStorageV3;
+use crate::state::*;
 
 
 
@@ -21,6 +21,18 @@ pub mod push_comm {
         storage.governance = push_admin;
         storage.push_channel_admin = push_admin;
         storage.chain_id = chain_id;
+        Ok(())
+    }
+
+    pub fn verify_channel_alias(ctx: Context<AliasVerification>,
+        channel_address: String
+    ) -> Result<()> {
+        let storage = &mut ctx.accounts.storage;
+        emit!(ChannelAlias {
+            chain_name: CHAIN_NAME.to_string(),
+            chain_id: storage.chain_id,
+            channel_address: channel_address,
+        });
         Ok(())
     }
 
@@ -95,6 +107,12 @@ pub struct SetPushTokenAddress <'info> {
     pub push_channel_admin: Signer<'info>,
 }
 
+#[derive(Accounts)]
+pub struct AliasVerification <'info > {
+    #[account(mut)]
+    pub storage: Account<'info, PushCommStorageV3>
+}
+
 // Error Handling
 #[error_code]
 pub enum PushCommError {
@@ -105,5 +123,13 @@ pub enum PushCommError {
     #[msg("Arithmetic operation failed")]
     ArithmeticError,
     // Add more errors as needed
+}
+
+// Events
+#[event]
+pub struct ChannelAlias{
+    pub chain_name: String,
+    pub chain_id: u64,
+    pub channel_address: String,
 }
 
