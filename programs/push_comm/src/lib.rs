@@ -59,7 +59,7 @@ pub mod push_comm {
         token_address: Pubkey,
     ) -> Result<()> {
         let storage = &mut ctx.accounts.storage;
-        storage.push_core_address = token_address;
+        storage.push_token_ntt = token_address;
         Ok(())
     }
     
